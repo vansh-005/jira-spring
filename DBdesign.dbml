@@ -1,0 +1,54 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+
+Table users {
+  id integer [primary key]
+  name varchar
+  role enum("ADMIN","MEMBER")
+  email varchar
+  created_at timestamp
+}
+
+Table project {
+  id integer [primary key]
+  name varchar
+  owner_id integer [ref: > users.id]
+  // member users [ref: <> users.id]
+  created_at timestamp
+}
+
+Table project_members {
+  project_id integer [ref: > project.id]
+  user_id integer [ref: > users.id]
+
+  indexes {
+    (project_id, user_id) [unique]
+  }
+}
+
+
+Table issues{
+  id integer [primary key]
+  title varchar
+  description varchar
+  type enum("BUG","TASK","STORY")
+  status enum("TO_DO","IN_PROGRESS","DONE")
+  priority enum("LOW", "MEDIUM", "HIGH")
+  assignee users [ref: < users.id]
+  reporter users [ref: < users.id]
+  in_project project [ref: > project.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+
+table issue_history{
+  id integer [primary key]
+  issue_id issue [ref: - issues.id]
+  old_status enum("TO_DO","IN_PROGRESS","DONE")
+  new_status enum("TO_DO","IN_PROGRESS","DONE")
+  changed_at timestamp
+  changed_by integer [ref: > users.id]
+}
